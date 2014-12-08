@@ -1,0 +1,159 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ARRAY_TYPE	subc.h	42;"	d
+CC	Makefile	/^CC = gcc$/;"	m
+CHAR_TYPE	subc.h	40;"	d
+COMPILE_OPTION	Makefile	/^COMPILE_OPTION = -g$/;"	m
+CONST_DECL	subc.h	34;"	d
+FALSE	semantic.c	3;"	d	file:
+FUNC_DECL	subc.h	35;"	d
+HASH_TABLE_SIZE	hash.c	10;"	d	file:
+INT_TYPE	subc.h	39;"	d
+LEX	Makefile	/^LEX = flex$/;"	m
+LINK_OPTION	Makefile	/^LINK_OPTION = -lfl$/;"	m
+MULTIPLIER	hash.c	19;"	d	file:
+PTR_TYPE	subc.h	43;"	d
+STRUCTOPdecl	semantic.c	/^struct decl* STRUCTOPdecl(struct decl* unary, struct id* field){$/;"	f
+STRUCT_TYPE	subc.h	44;"	d
+TRUE	semantic.c	4;"	d	file:
+TYPE_DECL	subc.h	36;"	d
+VAR_DECL	subc.h	33;"	d
+VOID_TYPE	subc.h	41;"	d
+YACC	Makefile	/^YACC = bison$/;"	m
+YACC_OPTION	Makefile	/^YACC_OPTION = -vd$/;"	m
+__SUBC_H__	subc.h	8;"	d
+a	var_def.c	/^int a;$/;"	v
+and_expr	subc.y	/^and_expr:       and_list{$/;"	l
+and_list	subc.y	/^and_list:       and_list LOGICAL_AND binary{$/;"	l
+args	subc.y	/^args:           expr{$/;"	l
+arrayaccess	semantic.c	/^struct decl* arrayaccess(struct decl* arrayptr, struct decl* indexptr){$/;"	f
+assigndecl	semantic.c	/^struct decl* assigndecl(struct decl* unary, struct decl* expr){$/;"	f
+binary	subc.y	/^binary:         binary RELOP binary{$/;"	l
+c	str_op.c	/^		char *c;$/;"	m	struct:str2::str3	file:
+c	str_op.c	/^	char *c;$/;"	m	struct:str2	file:
+c	str_op.c	/^	char *c;$/;"	m	struct:str3	file:
+c	str_op.c	/^	char c;$/;"	m	struct:str1	file:
+chartype	subc.h	/^struct decl* chartype;$/;"	v	typeref:struct:decl
+check_compatible	semantic.c	/^int check_compatible(struct decl* decl1, struct decl* decl2){$/;"	f
+check_fieldlist	semantic.c	/^int check_fieldlist(struct ste* field1, struct ste* field2){$/;"	f
+check_is_array	semantic.c	/^int check_is_array(struct decl* declptr){$/;"	f
+check_is_char	semantic.c	/^int check_is_char(struct decl* declptr){$/;"	f
+check_is_const	semantic.c	/^int check_is_const(struct decl* declptr){$/;"	f
+check_is_int	semantic.c	/^int check_is_int(struct decl* declptr){$/;"	f
+check_is_proc	semantic.c	/^int check_is_proc(struct decl* declptr){$/;"	f
+check_is_ptr	semantic.c	/^int check_is_ptr(struct decl* declptr){$/;"	f
+check_is_struct	semantic.c	/^int check_is_struct(struct decl* declptr){$/;"	f
+check_is_struct_type	semantic.c	/^int check_is_struct_type(struct decl* typeptr){$/;"	f
+check_is_type	semantic.c	/^int check_is_type(struct decl* declptr){$/;"	f
+check_is_var	semantic.c	/^int check_is_var(struct decl* declptr){$/;"	f
+check_is_void	semantic.c	/^int check_is_void(struct decl* declptr){$/;"	f
+checkfunctioncall	semantic.c	/^struct decl* checkfunctioncall(struct decl* procdecl, struct decl* actuals){$/;"	f
+compound_stmt	subc.y	/^compound_stmt:  '{' local_defs stmt_list '}'{$/;"	l
+data	hash.c	/^   struct id *data;$/;"	m	struct:nlist	typeref:struct:nlist::id	file:
+decl	subc.h	/^        struct decl     *decl;$/;"	m	struct:ste	typeref:struct:ste::decl
+decl	subc.h	/^struct decl {           $/;"	s
+declare	semantic.c	/^struct ste* declare(struct id* id, struct decl* decl){$/;"	f
+declare_struct	struct.c	/^struct ste* declare_struct(struct id* name, struct decl* structdecl){$/;"	f
+declclass	subc.h	/^        int             declclass;$/;"	m	struct:decl
+def	subc.y	/^def:            type_specifier pointers ID ';'  {$/;"	l
+def_list	subc.y	/^def_list:       def_list def{$/;"	l
+elementvar	subc.h	/^        struct decl     *elementvar;    \/\/TYPE ARRAY$/;"	m	struct:decl	typeref:struct:decl::decl
+enter	hash.c	/^struct id *enter(int lextype, char *name, int length) {$/;"	f
+equopdecl	semantic.c	/^struct decl* equopdecl(struct decl* decl1, struct decl* decl2){$/;"	f
+expr	subc.y	/^expr:$/;"	l
+expr_e	subc.y	/^expr_e  :       expr{$/;"	l
+ext_def	subc.y	/^ext_def:         type_specifier pointers ID ';'         {$/;"	l
+ext_def_list	subc.y	/^ext_def_list:   ext_def_list ext_def{$/;"	l
+fieldlist	subc.h	/^        struct ste      *fieldlist;     \/\/TYPE STRUCT$/;"	m	struct:decl	typeref:struct:decl::ste
+findcurrentdecl	semantic.c	/^struct decl* findcurrentdecl(struct id* name){$/;"	f
+findcurrentdecl_struct	struct.c	/^struct decl* findcurrentdecl_struct(struct id* name){$/;"	f
+formals	subc.h	/^        struct ste      *formals;       \/\/FUNC$/;"	m	struct:decl	typeref:struct:decl::ste
+func1	func_op.c	/^int func1(int a, char b, struct c a) {$/;"	f
+func2	func_op.c	/^char func2(void) {$/;"	f
+func3	func_op.c	/^void func3(int *a, int b) {$/;"	f
+func_decl	subc.y	/^func_decl:      type_specifier pointers ID '(' open_func_param_scope ')' {$/;"	l
+hash	hash.c	/^unsigned hash(char *name) {$/;"	f
+hashTable	hash.c	/^static struct nlist *hashTable[HASH_TABLE_SIZE];$/;"	v	typeref:struct:nlist	file:
+i	str_op.c	/^		int *i;$/;"	m	struct:str2::str3	file:
+i	str_op.c	/^	int *i;$/;"	m	struct:str2	file:
+i	str_op.c	/^	int *i;$/;"	m	struct:str3	file:
+i	str_op.c	/^	int i;$/;"	m	struct:str1	file:
+id	subc.h	/^struct id {             $/;"	s
+inttype	subc.h	/^struct decl* inttype;$/;"	v	typeref:struct:decl
+lextype	subc.h	/^      int lextype;$/;"	m	struct:id
+local_defs	subc.y	/^local_defs:     def_list{$/;"	l
+logicalopdecl	semantic.c	/^struct decl* logicalopdecl(struct decl* decl1, struct decl* decl2){$/;"	f
+lookup	hash.c	/^struct id *lookup(char *name) {$/;"	f
+main	func_op.c	/^int main(void) {$/;"	f
+main	ptr_op.c	/^int main(void) {$/;"	f
+main	str_op.c	/^int main(void) {$/;"	f
+main	var_def.c	/^int main() {$/;"	f
+makearraydecl	semantic.c	/^struct decl* makearraydecl(int size, struct decl* vardecl){$/;"	f
+makecharconstdecl	semantic.c	/^struct decl* makecharconstdecl(struct decl* typedecl, char* stringVal){$/;"	f
+makeconstdecl	semantic.c	/^struct decl* makeconstdecl(struct decl* typedecl){$/;"	f
+makenumconstdecl	semantic.c	/^struct decl* makenumconstdecl(struct decl* typedecl, int intVal){$/;"	f
+makeprocdecl	semantic.c	/^struct decl* makeprocdecl(){$/;"	f
+makeptrdecl	semantic.c	/^struct decl* makeptrdecl(struct decl* typedecl){$/;"	f
+makestringconstdecl	semantic.c	/^struct decl* makestringconstdecl(struct decl* typedecl, char* stringVal){$/;"	f
+makestructdecl	semantic.c	/^struct decl* makestructdecl(struct ste* fields){$/;"	f
+maketypedecl	semantic.c	/^struct decl* maketypedecl(int type){$/;"	f
+makevardecl	semantic.c	/^struct decl* makevardecl(struct decl* typedecl){$/;"	f
+minusdecl	semantic.c	/^struct decl* minusdecl(struct decl* decl1, struct decl* decl2){$/;"	f
+name	subc.h	/^        struct id       *name;$/;"	m	struct:ste	typeref:struct:ste::id
+name	subc.h	/^      char *name;$/;"	m	struct:id
+next	hash.c	/^   struct nlist *next;$/;"	m	struct:nlist	typeref:struct:nlist::nlist	file:
+next	subc.h	/^        struct decl     *next;          \/\/ALL$/;"	m	struct:decl	typeref:struct:decl::decl
+nlist	hash.c	/^struct nlist {$/;"	s	file:
+num_index	subc.h	/^        int             num_index;      \/\/TYPE ARRAY$/;"	m	struct:decl
+offset	subc.h	/^        int             offset;         \/\/$/;"	m	struct:decl
+open_func_param_scope	subc.y	/^open_func_param_scope : \/*empty*\/ \/\/ mid-rule statement for func decl$/;"	l
+or_expr	subc.y	/^or_expr:        or_list{$/;"	l
+or_list	subc.y	/^or_list:        or_list LOGICAL_OR and_expr{$/;"	l
+param_decl	subc.y	/^param_decl:      type_specifier pointers ID     {$/;"	l
+plusdecl	semantic.c	/^struct decl* plusdecl(struct decl* decl1, struct decl* decl2){$/;"	f
+pointers	subc.y	/^pointers:       '*'     {$/;"	l
+pop_scope	semantic.c	/^struct ste* pop_scope(){$/;"	f
+prev	subc.h	/^        struct sse      *prev;$/;"	m	struct:sse	typeref:struct:sse::sse
+prev	subc.h	/^        struct ste      *prev;$/;"	m	struct:ste	typeref:struct:ste::ste
+program	subc.y	/^program: ext_def_list   {$/;"	l
+ptropdecl	semantic.c	/^struct decl* ptropdecl(struct decl* unary){$/;"	f
+ptrto	subc.h	/^        struct decl     *ptrto;         \/\/TYPE POINTER$/;"	m	struct:decl	typeref:struct:decl::decl
+push_scope	semantic.c	/^void push_scope(){$/;"	f
+pushstelist	semantic.c	/^void pushstelist(struct ste* popped_scope){$/;"	f
+referdecl	semantic.c	/^struct decl* referdecl(struct decl* unary){$/;"	f
+relopdecl	semantic.c	/^struct decl* relopdecl(struct decl* decl1, struct decl* decl2){$/;"	f
+remove_top_ste	semantic.c	/^void remove_top_ste(){$/;"	f
+returndecl	subc.h	/^        struct decl     *returndecl;    \/\/FUNC$/;"	m	struct:decl	typeref:struct:decl::decl
+returnid	subc.h	/^struct id*   returnid;$/;"	v	typeref:struct:id
+scope	subc.h	/^        struct ste      **scope;        \/\/VAR$/;"	m	struct:decl	typeref:struct:decl::ste
+scope_entry	subc.h	/^        struct ste      *scope_entry;$/;"	m	struct:sse	typeref:struct:sse::ste
+scope_stack	subc.h	/^static struct sse       *scope_stack;$/;"	v	typeref:struct:sse
+size	subc.h	/^        int             size;           \/\/ALL$/;"	m	struct:decl
+ss	struct.c	/^static struct ste* ss;  \/\/struct stack;$/;"	v	typeref:struct:ste	file:
+sse	subc.h	/^struct sse {    $/;"	s
+st	str_op.c	/^	} st;$/;"	m	struct:str2	typeref:struct:str2::str3	file:
+st_insert	semantic.c	/^struct ste* st_insert(struct id* name, struct decl* decl){$/;"	f
+st_lookup	semantic.c	/^struct ste* st_lookup(struct id* name){$/;"	f
+st_lookup_in_scope	semantic.c	/^struct ste* st_lookup_in_scope(struct ste* scope, struct id* name){$/;"	f
+ste	subc.h	/^struct ste {$/;"	s
+stmt	subc.y	/^stmt:           expr ';'{$/;"	l
+stmt_list	subc.y	/^stmt_list:      stmt_list stmt{$/;"	l
+str1	str_op.c	/^struct str1 {$/;"	s	file:
+str2	str_op.c	/^struct str2 {$/;"	s	file:
+str3	str_op.c	/^	struct str3 {$/;"	s	struct:str2	file:
+str3	str_op.c	/^struct str3 { \/* error, redeclaration of struct str3 *\/$/;"	s	file:
+string_value	subc.h	/^        char*           string_value;   \/\/CONST$/;"	m	struct:decl
+struct_insert	struct.c	/^struct ste* struct_insert(struct id* name, struct decl* structdecl){$/;"	f
+struct_lookup	struct.c	/^struct ste* struct_lookup(struct id*name){$/;"	f
+struct_specifier	subc.y	/^struct_specifier: STRUCT ID '{'$/;"	l
+structaccess	semantic.c	/^struct decl* structaccess(struct decl* structptr, struct id* fieldid){$/;"	f
+type	subc.h	/^        struct decl     *type;          \/\/VAR, CONST$/;"	m	struct:decl	typeref:struct:decl::decl
+type_specifier	subc.y	/^type_specifier: TYPE{$/;"	l
+typeclass	subc.h	/^		int             typeclass;      \/\/TYPE$/;"	m	struct:decl
+unary	subc.y	/^unary:          '(' expr ')'{$/;"	l
+value	subc.h	/^        int             value;          \/\/CONST$/;"	m	struct:decl
+voidtype	subc.h	/^struct decl* voidtype;$/;"	v	typeref:struct:decl
