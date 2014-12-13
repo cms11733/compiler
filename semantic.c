@@ -33,7 +33,7 @@ struct ste* st_insert(struct id* name, struct decl* decl){
         ret_ste = (struct ste*) malloc(sizeof(struct ste));
         ret_ste->name = name;
         ret_ste->decl = decl;
-		ret_ste->offset = scope_stack->scope_entry->offset + decl->size;
+	ret_ste->offset = scope_stack->scope_entry->offset + decl->size;
         ret_ste->prev = scope_stack->scope_entry;
 
         scope_stack->scope_entry = ret_ste;
@@ -89,6 +89,12 @@ struct decl* makestructdecl(struct ste* fields){
         typedecl->declclass = TYPE_DECL;
         typedecl->typeclass = STRUCT_TYPE;
         typedecl->fieldlist = fields;
+	typedecl->size = 0;
+	struct ste* fields_list = fields;
+	while(fields_list){
+		typedecl->size += fields_list->decl->size;
+		fields_list = fields_list->prev;
+	}
 
         return typedecl;
 }
@@ -109,7 +115,8 @@ struct decl* makevardecl(struct decl* typedecl){
        struct decl* vardecl = (struct decl*) malloc(sizeof(struct decl));
         vardecl->declclass = VAR_DECL;
         vardecl->type = typedecl;
-		vardecl->offset = scope_stack->scope_entry->offset;
+	vardecl->size = typedecl->size;
+	vardecl->offset = scope_stack->scope_entry->offset;
 
         return vardecl;
 }
@@ -124,10 +131,11 @@ struct decl* makeptrdecl(struct decl* typedecl){
         ptrdecl->declclass = TYPE_DECL;
         ptrdecl->typeclass = PTR_TYPE;
         ptrdecl->ptrto  = typedecl;
+	ptrdecl->size = 1;
         return ptrdecl;
 }
 
-struct decl* makearraydecl(int size, struct decl* vardecl){
+struct decl* makearraydecl(int index, struct decl* vardecl){
         if(vardecl==NULL) return NULL;
         if(check_is_var == FALSE) {
                 printf("not var type\n");
@@ -137,8 +145,9 @@ struct decl* makearraydecl(int size, struct decl* vardecl){
         struct decl* arraydecl = (struct decl*) malloc(sizeof(struct decl));
         arraydecl->declclass = TYPE_DECL;
         arraydecl->typeclass = ARRAY_TYPE;
-        arraydecl->num_index = size;
+        arraydecl->num_index = index;
         arraydecl->elementvar = vardecl;
+	arraydecl->size = index*vardecl->size;
         return arraydecl;
 }
 
@@ -147,6 +156,7 @@ struct decl* makeconstdecl(struct decl* typedecl){
         struct decl* constdecl = (struct decl*) malloc(sizeof(struct decl));
         constdecl->declclass = CONST_DECL;
         constdecl->type = typedecl;
+	constdecl->size = typedecl->size;
 
         return constdecl;
 }
@@ -156,6 +166,8 @@ struct decl* makenumconstdecl(struct decl* typedecl, int intVal){
         constdecl->declclass = CONST_DECL;
         constdecl->type = typedecl;
         constdecl->value = intVal;
+	constdecl->size = 1;	
+
         return constdecl;
 }
 
@@ -164,6 +176,8 @@ struct decl* makecharconstdecl(struct decl* typedecl, char* stringVal){
         constdecl->declclass = CONST_DECL;
         constdecl->type = typedecl;
         constdecl->string_value = stringVal;
+	constdecl->size = 1;
+
         return constdecl;
 }
 
@@ -173,8 +187,11 @@ struct decl* makestringconstdecl(struct decl* typedecl, char* stringVal){
         arrayelementdecl->type = typedecl;
         struct decl* constdecl = (struct decl*) malloc(sizeof(struct decl));
         constdecl->declclass = CONST_DECL;
-        constdecl->type = makearraydecl(strlen(stringVal), arrayelementdecl);
+	struct decl* arraydecl = makearraydecl(strlen(stringVal), arrayelementdecl); 
+        constdecl->type = arraydecl;
         constdecl->string_value = stringVal;
+	constdecl->size = arraydecl->size;
+
         return constdecl;
 }
 
