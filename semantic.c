@@ -33,10 +33,12 @@ struct ste* st_insert(struct id* name, struct decl* decl){
         ret_ste = (struct ste*) malloc(sizeof(struct ste));
         ret_ste->name = name;
         ret_ste->decl = decl;
-	if(scope_stack->scope_entry != NULL)
-		ret_ste->offset = scope_stack->scope_entry->offset + decl->size;
-	else 
-		ret_ste->offset = decl->size;
+	if(name->name != returnid){
+		if(scope_stack->scope_entry != NULL)
+			ret_ste->offset = scope_stack->scope_entry->offset + decl->size;
+		else 
+			ret_ste->offset = decl->size;
+	}
         ret_ste->prev = scope_stack->scope_entry;
 
         scope_stack->scope_entry = ret_ste;
