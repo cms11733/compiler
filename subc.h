@@ -9,7 +9,10 @@
                         
 #include <stdlib.h>             
 #include <stdio.h>              
-#include <string.h>     
+#include <string.h>    
+#include <stdarg.h>
+
+#define CODE_LINE_MAX_SIZE 100 
                         
 /* structure for ID */          
 struct id {             
@@ -26,7 +29,7 @@ struct sse {
 struct ste {
         struct id       *name;
         struct decl     *decl;
-		int 			offset;
+	int 			offset;
         struct ste      *prev;
 };      
         
@@ -51,7 +54,7 @@ struct decl {
         char*           string_value;   //CONST
         struct ste      *formals;       //FUNC
         struct decl     *returndecl;    //FUNC
-		int             typeclass;      //TYPE
+	int             typeclass;      //TYPE
         struct decl     *elementvar;    //TYPE ARRAY
         int             num_index;      //TYPE ARRAY
         struct ste      *fieldlist;     //TYPE STRUCT
@@ -62,6 +65,11 @@ struct decl {
         struct decl     *next;          //ALL
 };
 
+/* For func code_gen */
+char* func_name;
+int block_num;
+int string_num;
+char code_gen[CODE_LINE_MAX_SIZE];
 
 /* For hash table */
 unsigned hash(char *name);
@@ -115,6 +123,7 @@ int check_is_array(struct decl* declptr);
 int check_is_proc(struct decl* declptr);
 int check_compatible(struct decl* decl1, struct decl* decl2);
 
+struct decl* INCOPDECOPdecl(struct decl* structdecl, int i);
 struct decl* structaccess(struct decl* structdecl, struct id* ID);
 struct decl* arrayaccess(struct decl* arraydecl, struct decl* IndexVarOrConstDecl);
 struct decl* plusdecl(struct decl* decl1, struct decl* decl2);
@@ -136,6 +145,7 @@ struct id*   returnid;
 
 int read_line();
 char* read_filename();
-int yyprint(char* s);
+int yyprint(const char* format, ...);
+struct sse* getscopetop();
 
 #endif

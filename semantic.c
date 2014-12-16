@@ -33,7 +33,10 @@ struct ste* st_insert(struct id* name, struct decl* decl){
         ret_ste = (struct ste*) malloc(sizeof(struct ste));
         ret_ste->name = name;
         ret_ste->decl = decl;
-	ret_ste->offset = scope_stack->scope_entry->offset + decl->size;
+	if(scope_stack->scope_entry != NULL)
+		ret_ste->offset = scope_stack->scope_entry->offset + decl->size;
+	else 
+		ret_ste->offset = decl->size;
         ret_ste->prev = scope_stack->scope_entry;
 
         scope_stack->scope_entry = ret_ste;
@@ -89,12 +92,16 @@ struct decl* makestructdecl(struct ste* fields){
         typedecl->declclass = TYPE_DECL;
         typedecl->typeclass = STRUCT_TYPE;
         typedecl->fieldlist = fields;
-	typedecl->size = 0;
-	struct ste* fields_list = fields;
-	while(fields_list){
-		typedecl->size += fields_list->decl->size;
-		fields_list = fields_list->prev;
+	struct ste* fieldlist = fields;
+	if(fieldlist == NULL){
+		typedecl->size = 0;
 	}
+	else {
+		while(fieldlist->prev){
+			fieldlist = fieldlist->prev;
+		}
+	}
+	typedecl->size = fieldlist->offset;
 
         return typedecl;
 }
@@ -116,7 +123,10 @@ struct decl* makevardecl(struct decl* typedecl){
         vardecl->declclass = VAR_DECL;
         vardecl->type = typedecl;
 	vardecl->size = typedecl->size;
-	vardecl->offset = scope_stack->scope_entry->offset;
+	if(scope_stack->scope_entry != NULL)
+		vardecl->offset = scope_stack->scope_entry->offset;
+	else 
+		vardecl->offset = 0;
 
         return vardecl;
 }
@@ -298,6 +308,15 @@ void pushstelist(struct ste* popped_scope){
         }
 }
 
+struct decl* INCOPDECOPdecl(struct decl* declptr, int i){
+		struct decl* constdecl = (struct decl*) malloc(sizeof(struct decl));
+		constdecl->declclass = CONST_DECL;
+		constdecl->value = declptr->value + i;
+		constdecl->type = declptr->type;
+		constdecl->size = declptr->size;
+
+		return constdecl;
+}
 struct decl* arrayaccess(struct decl* arrayptr, struct decl* indexptr){
         if(arrayptr == NULL) return NULL;
         if(indexptr == NULL) {
@@ -514,3 +533,7 @@ void remove_top_ste(){
 			return;
 		}
 }
+struct sse* getscopetop(){
+	return scope_stack;
+}
+

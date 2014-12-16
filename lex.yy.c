@@ -1961,14 +1961,14 @@ void init_type(){
 }
 
 void start_code(){
-	yyprint("\tshift_sp 1");
-	yyprint("\tpush_const EXIT");
-	yyprint("\tpush_reg fp");
-	yyprint("\tpush_reg sp");
-	yyprint("\tpop_reg fp");
-	yyprint("\tjump main");
-	yyprint("EXIT:");
-	yyprint("\texit");
+	yyprint("\tshift_sp 1\n");
+	yyprint("\tpush_const EXIT\n");
+	yyprint("\tpush_reg fp\n");
+	yyprint("\tpush_reg sp\n");
+	yyprint("\tpop_reg fp\n");
+	yyprint("\tjump main\n");
+	yyprint("EXIT:\n");
+	yyprint("\texit\n");
 }
 
 

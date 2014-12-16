@@ -48,7 +48,7 @@ extern struct id* returnid;
 %token<intVal>          INTEGER_CONST
 %token<idptr>           TYPE
 %type<intVal>           pointers const_expr
-%type<declptr>          type_specifier struct_specifier open_func_param_scope unary binary args and_list or_list and_expr or_expr expr expr_e
+%type<declptr>          type_specifier struct_specifier func_decl open_func_param_scope unary binary args and_list or_list and_expr or_expr expr expr_e
 
 %%
 
@@ -139,6 +139,8 @@ func_decl:      type_specifier pointers ID '(' open_func_param_scope ')' {
                 procdecl->formals = formals->prev;
                 push_scope();
                 pushstelist(formals);
+		$$ = procdecl;
+		yyprint("%s:\n", func_name);
 
         }
                 | type_specifier pointers ID '(' open_func_param_scope VOID ')' {
@@ -150,6 +152,9 @@ func_decl:      type_specifier pointers ID '(' open_func_param_scope ')' {
                 procdecl->formals = formals->prev;
                 push_scope();
                 pushstelist(formals);
+		$$ = procdecl;
+		yyprint(code_gen,"%s:\n", func_name);
+		
         }
                 | type_specifier pointers ID '(' open_func_param_scope param_list ')' {
                 REDUCE("func_decl->type_specifier pointers ID '(' param_list ')'");
@@ -160,6 +165,9 @@ func_decl:      type_specifier pointers ID '(' open_func_param_scope ')' {
                 procdecl->formals = formals->prev;
                 push_scope();
                 pushstelist(formals);
+		$$ = procdecl;
+		yyprint(code_gen,"%s:\n", func_name);
+		
         }
         ;
 
@@ -169,6 +177,7 @@ open_func_param_scope : /*empty*/ // mid-rule statement for func decl
                 struct decl* procdecl = makeprocdecl();
                 struct id* name = $<idptr>-1;
                 declare(name, procdecl);
+		func_name = name->name;
                 push_scope();
 //              printf("returnid : %s\n", returnid->name);
                 if($<intVal>-2 == 1) {
@@ -251,11 +260,23 @@ def:            type_specifier pointers ID ';'  {
         ;
 compound_stmt:  '{'	
 		{	
-					push_scope();
+			push_scope();
+			//sprintf(code_gen, "block_%d:", block_num++);
+			//
+			
 		}
-				local_defs stmt_list	
+				local_defs
 		{
-					pop_scope();
+			struct sse* scope_top = getscopetop();
+			if(scope_top->scope_entry)
+			yyprint("\tshift_sp %d\n", scope_top->scope_entry->offset);
+			
+			yyprint("%s_start:\n", func_name);
+			
+		}
+				stmt_list	
+		{
+			pop_scope();
 		}
 				'}'
 		{
@@ -275,6 +296,7 @@ stmt_list:      stmt_list stmt{
         ;
 stmt:           expr ';'{
                 REDUCE("stmt->expr ';'");
+			yyprint("\tshift_sp -1\n");
         }
                 | compound_stmt{
                 REDUCE("stmt->compound_stmt");
@@ -296,6 +318,8 @@ stmt:           expr ';'{
         }
                 | ';'{
                 REDUCE("stmt->';'");
+		yyprint("\tshift_sp -1\n");
+		
         }
                 | IF '(' expr ')' stmt %prec IF {
                 REDUCE("stmt->IF '(' expr ')' stmt");
@@ -339,15 +363,33 @@ const_expr
         }
         ;
 expr:
-                unary '=' expr{
+                unary assign_action '=' expr{
                 REDUCE("expr->expr '=' expr");
-                $$ = assigndecl($1, $3);
+                $$ = assigndecl($1, $4);
+		if($$!=NULL){
+			yyprint("\tassign\n");
+			yyprint("\tfetch\n");
+		}
         }
                 | or_expr{
                 REDUCE("expr->or_expr");
                 $$ = $1;
+		if(check_is_var($1)){
+			if(check_is_var($1)){
+				yyprint("\tfetch\n");
+			}
+		}
         }
         ;
+assign_action : /*empty*/
+		{
+			if($<declptr>0 != NULL){
+				yyprint("\tpush_reg sp\n");
+				yyprint("\tfetch\n");
+			}
+			
+		}
+		;
 or_expr:        or_list{
                 REDUCE("or_expr->or_list");
                 $$ = $1;
@@ -398,107 +440,267 @@ binary:         binary RELOP binary{
         }
         ;
 unary:          '(' expr ')'{
+			//L-VALUE
                 REDUCE("unary->'(' expr ')'");
                 $$ = $2;
         }
                 |'(' unary ')'  {
+			//R-VALUE OR L-VALUE
                 REDUCE("unary->'(' unary ')'");
                 $$ = $2;
         }
                 | INTEGER_CONST{
+			//L-VALUE
                 REDUCE("unary->INTEGER_CONST");
                 $$ = makenumconstdecl(inttype, $1);
+			yyprint("\tpush_const %d\n", $1);
         }
                 | CHAR_CONST{
+			//L-VALUE
                 REDUCE("unary->CHAR_CONST");
                 $$ = makecharconstdecl(chartype, $1);
+			yyprint("\tpush_const %s\n", $1);
         }
                 | ID{
+			//R-VALUE
                 REDUCE("unary->ID");
                 $$ = findcurrentdecl($1);
+		if($$ !=NULL){
+			yyprint("\tpush_reg fp\n");
+			yyprint("\tpush_const %d\n",$$->offset+1);
+			yyprint("\tadd\n");
+		}
         }
                 | STRING{
+			//L-VALUE
                 REDUCE("unary->STRING");
                 $$ = makestringconstdecl(chartype, $1);
+		yyprint("Str%d. string %s\n", string_num, $1);
+		yyprint("\tpush_const Str%d\n",string_num++);
         }
                 | '-' unary %prec '!' {
+			//L-VALUE
                 REDUCE("unary->'-' unary");
-                if(check_is_int($2)) $$ = $2;
+                if(check_is_int($2)) {
+			$$ = $2;
+			if(check_is_var($2)){
+				yyprint("\tfetch\n");
+				yyprint("\tnegate\n");
+			}
+			else{
+				$$->value = -$$->value;
+				yyprint("\tnegate\n");
+			}
+		}
                 else {
                         printf("%s:%d:error: illegal type for '-' unary op\n",read_filename(), read_line());
                         $$ = NULL;
                 }
         }
                 | '!' unary{
+			//L-VALUE
                 REDUCE("unary->'!' unary");
-                if(check_is_int($2)) $$ = $2;
+                if(check_is_int($2)) {
+			$$ = $2;
+			if(check_is_var($2)){
+				yyprint("\tfetch\n");
+				yyprint("\tnot\n");
+			}
+			else{
+				$$->value = !$$->value;
+				yyprint("\tnot\n");
+			}
+		}
                 else {
                         printf("%s:%d:error: illegal type for '!' unary op\n",read_filename(), read_line());
                         $$ = NULL;
                 }
         }
                 | unary INCOP{
+			//L-VALUE
                 REDUCE("unary->unary INCOP");
-                if(check_is_int($1) || check_is_char($1) || check_is_ptr($1)) $$ = $1;
+                if(check_is_int($1) || check_is_char($1) || check_is_ptr($1)){
+			$$ = INCOPDECOPdecl($1,1);
+			if(check_is_var($1)){
+				yyprint("\tfetch\n");
+				yyprint("\tpush_reg fp\n");
+				yyprint("\tpush_const %d\n",$1->offset+1);
+				yyprint("\tadd\n");
+				yyprint("\tpush_reg fp\n");
+				yyprint("\tpush_const %d\n",$1->offset+1);
+				yyprint("\tadd\n");
+				yyprint("\tfetch\n");
+				if(check_is_ptr($1) && ($1->type->ptrto != NULL))
+					yyprint("\tpush_const %d\n",$1->type->ptrto->size);	// 1 size adding
+				else
+					yyprint("\tpush_const 1\n");
+				yyprint("\tadd\n");
+				yyprint("\tassign\n");
+			}
+			else{
+				// CONST has nothing to do.
+			}
+		}
                 else {
                         printf("%s:%d:error: illegal type for postfixINCOP\n",read_filename(), read_line());
                         $$ =  NULL;
                 }
         }
                 | unary DECOP{
+			//L-VALUE
                 REDUCE("unary->unary DECOP");
-                if(check_is_int($1) || check_is_char($1) || check_is_ptr($1)) $$ = $1;
+                if(check_is_int($1) || check_is_char($1) || check_is_ptr($1)){
+			$$ = INCOPDECOPdecl($1,-1);
+			if(check_is_var($1)){
+				yyprint("\tfetch\n");
+				yyprint("\tpush_reg fp\n");
+				yyprint("\tpush_const %d\n",$1->offset+1);
+				yyprint("\tadd\n");
+				if(check_is_ptr($1) && ($1->type->ptrto != NULL))
+					yyprint("\tpush_const %d\n",$1->type->ptrto->size);	// 1 size adding
+				else
+					yyprint("\tpush_const 1\n");
+				yyprint("\tpush_reg fp\n");
+				yyprint("\tpush_const %d\n",$1->offset+1);
+				yyprint("\tadd\n");
+				yyprint("\tfetch\n");
+				yyprint("\tsub\n");
+				yyprint("\tassign\n");
+			}
+			else{
+				// CONST has nothing to do.
+			}
+		}
                 else {
                         printf("%s:%d:error: illegal type for postfixDECOP\n",read_filename(), read_line());
                         $$ =  NULL;
                 }
         }
                 | INCOP unary{
+			//L-VALUE
                 REDUCE("unary->INCOP unary");
-                if(check_is_int($2) || check_is_char($2) || check_is_ptr($2)) $$ = $2;
+                if(check_is_int($2) || check_is_char($2) || check_is_ptr($2)){
+			$$ = INCOPDECOPdecl($2,1);
+			if(check_is_var($2)){
+				// already addr of ID is stacked
+				yyprint("\tpush_reg fp\n");
+				yyprint("\tpush_const %d\n",$2->offset+1);
+				yyprint("\tadd\n");
+				yyprint("\tfetch\n");
+				if(check_is_ptr($2) && ($2->type->ptrto != NULL))
+					yyprint("\tpush_const %d\n",$2->type->ptrto->size);	// 1 size adding
+				else
+					yyprint("\tpush_const 1\n");
+				yyprint("\tadd\n");
+				yyprint("\tassign\n");
+				yyprint("\tfetch\n");
+			}
+			else{
+				yyprint("\tpush_const 1\n");
+				yyprint("\tadd\n");
+				// CONST has nothing to do.
+			}
+		}
                 else {
                         printf("%s:%d:error: illegal type for prefixINCOP\n",read_filename(), read_line());
                         $$ =  NULL;
                 }
         }
                 | DECOP unary{
+			//L-VALUE
                 REDUCE("unary->DECOP unary");
-                if(check_is_int($2) || check_is_char($2) || check_is_ptr($2)) $$ = $2;
+                if(check_is_int($2) || check_is_char($2) || check_is_ptr($2)){
+			$$ = INCOPDECOPdecl($2,-1);
+			if(check_is_var($2)){
+				// already addr of ID is stacked
+				yyprint("\tpush_reg fp\n");
+				yyprint("\tpush_const %d\n",$2->offset+1);
+				yyprint("\tadd\n");
+				yyprint("\tfetch\n");
+				if(check_is_ptr($2) && ($2->type->ptrto != NULL))
+					yyprint("\tpush_const %d\n",$2->type->ptrto->size);	// 1 size adding
+				else
+					yyprint("\tpush_const 1\n");
+				yyprint("\tsub\n");
+				yyprint("\tassign\n");
+				yyprint("\tfetch\n");
+			}
+			else{
+				yyprint("\tpush_const 1\n");
+				yyprint("\tsub\n");
+				// CONST has nothing to do.
+			}
+		}
                 else {
                         printf("%s:%d:error: illegal type for DECOP\n",read_filename(), read_line());
-
                         $$ = NULL;
                 }
         }
                 | '&' unary %prec '!'{
+			//L-VALUE
                 REDUCE("unary->'&' unary");
                 $$ = referdecl($2);
+		yyprint("\tpush_reg sp\n");
         }
                 | '*' unary %prec '!' {
+			//R_VALUE
                 REDUCE("unary->'*' unary");
                 $$ = ptropdecl($2);
+		if($$ != NULL){
+			yyprint("\tfetch\n");
+		}
         }
                 | unary '[' expr ']'    {
+			//R-VALUE
                 REDUCE("unary->unary '[' expr ']'");
                 $$ = arrayaccess($1, $3);
+		if($$!=NULL){
+			yyprint("\tpush_const %d\n", $3->size);
+			yyprint("\tmul\n");
+			yyprint("\tadd\n");
+		}
         }
                 | unary '.' ID  {
+			// R-VALUE
                 REDUCE("unary-> unary '.' ID");
                 $$ = structaccess($1, $3);
+		if($$!=NULL){
+			yyprint("\tpush_const %d\n", $$->offset);
+			yyprint("\tadd\n");
+		}
         }
                 | unary STRUCTOP ID     {
                 REDUCE("unary->unary STRUCTOP ID");
                 $$ = STRUCTOPdecl($1, $3);
+		if($$!=NULL){
+			yyprint("\tfetch\n");	// addr of ptrto
+			yyprint("\tpush_const %d\n", $$->offset);
+			yyprint("\tadd\n");
+		}
         }
-                | unary '(' args ')'    {
+                | unary '(' pre_func_call args ')'    {
                 REDUCE("unary->unary '(' args ')'");
-                $$ = checkfunctioncall($1,$3);
+                $$ = checkfunctioncall($1,$4);
+		
         }
                 | unary '(' ')' {
                 REDUCE("unary->unary '(' ')'");
                 $$ = checkfunctioncall($1, NULL);
         }
         ;
+pre_func_call : /*empty*/
+	{
+		struct decl* unary = $<declptr>-1;
+		struct decl*
+		if(){
+			yyprint("\tshift_sp %d\n", findcurrentdecl(returnid)->size);
+			yyprint("\tpush_const label_%d\n", block_num);
+			yyprint("\tpush_reg fp\n");
+
+		}
+		
+	}
+
 args:           expr{
                 REDUCE("args->expr");
                 $$ = makeconstdecl($1->type);
@@ -529,9 +731,13 @@ int    yyerror (char* s)
         fprintf (stderr, "%s\n", s);
 }
 
-int 	yyprint(char* s)
+int 	yyprint(const char* format, ...)
 {
-		fprintf (stdout, "%s\n", s);
+		va_list arg;
+		
+		va_start(arg, format);
+		vfprintf (stdout, format, arg);
+		va_end(arg);
 }
 
 void    REDUCE( char* s)
