@@ -67,6 +67,7 @@ struct decl {
 
 /* For func code_gen */
 char* func_name;
+char* called_func_name;
 int block_num;
 int string_num;
 char code_gen[CODE_LINE_MAX_SIZE];

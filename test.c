@@ -1,8 +1,8 @@
-struct a{
-	int a;
-	int b;
-};
+int foo(int a){
+	return a;
+}
 int main(){
-	struct a a;
-	a.a;
+	int a;
+	a = 0;
+	foo(a);
 }

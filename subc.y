@@ -80,18 +80,28 @@ ext_def:         type_specifier pointers ID ';'         {
                         declare($3, makeconstdecl(makearraydecl($5,makevardecl($1))));
                 }
         }
-                | func_decl ';' {
+                | func_decl func_exit ';' {
                 REDUCE("ext_def->func_decl ;");
                 pop_scope();
         }
                 | type_specifier ';'    {
                 REDUCE("ext_def->type_specifier ;");
         }
-                | func_decl compound_stmt       {
+                | func_decl compound_stmt func_exit     {
                 REDUCE("ext_def->func_decl compound_stmt");
                 pop_scope();
         }
         ;
+func_exit:	/*empty*/
+	{
+		yyprint("%s_exit:\n",func_name);
+		yyprint("\tpush_reg sp\n");
+		yyprint("\tpop_reg sp\n");
+		yyprint("\tpop_reg fp\n");
+		yyprint("\tpop_reg pc\n");
+		yyprint("%s_end:\n",func_name);
+	}
+	;
 type_specifier: TYPE{
                 REDUCE("type_specifier->TYPE");
                 struct decl* currentdecl = findcurrentdecl($1);
@@ -153,7 +163,7 @@ func_decl:      type_specifier pointers ID '(' open_func_param_scope ')' {
                 push_scope();
                 pushstelist(formals);
 		$$ = procdecl;
-		yyprint(code_gen,"%s:\n", func_name);
+		yyprint("%s:\n", func_name);
 		
         }
                 | type_specifier pointers ID '(' open_func_param_scope param_list ')' {
@@ -166,7 +176,7 @@ func_decl:      type_specifier pointers ID '(' open_func_param_scope ')' {
                 push_scope();
                 pushstelist(formals);
 		$$ = procdecl;
-		yyprint(code_gen,"%s:\n", func_name);
+		yyprint("%s:\n", func_name);
 		
         }
         ;
@@ -465,10 +475,12 @@ unary:          '(' expr ')'{
 			//R-VALUE
                 REDUCE("unary->ID");
                 $$ = findcurrentdecl($1);
-		if($$ !=NULL){
+		if(check_is_var($$) || check_is_const($$)){
 			yyprint("\tpush_reg fp\n");
 			yyprint("\tpush_const %d\n",$$->offset+1);
 			yyprint("\tadd\n");
+		}else if(check_is_proc($$)){
+			called_func_name = $1->name;
 		}
         }
                 | STRING{
@@ -681,26 +693,48 @@ unary:          '(' expr ')'{
                 | unary '(' pre_func_call args ')'    {
                 REDUCE("unary->unary '(' args ')'");
                 $$ = checkfunctioncall($1,$4);
+		if($$!=NULL){
+			struct decl* args = $4;
+			int i = 0;
+			while(args){
+				i++;
+				args = args->next;
+			}
+			yyprint("\tpush_reg sp\n");
+			yyprint("\tpush_const %d\n",-1*i);
+			yyprint("\tadd\n");
+			yyprint("\tpop_reg fp\n");
+			yyprint("\tjump %s\n",called_func_name);
+			yyprint("label_%d:\n",block_num);
+			block_num++;
+		}
 		
         }
-                | unary '(' ')' {
+                | unary '(' pre_func_call ')' {
                 REDUCE("unary->unary '(' ')'");
                 $$ = checkfunctioncall($1, NULL);
+		if($$!=NULL){
+			yyprint("\tpush_reg sp\n");
+			yyprint("\tpop_reg fp\n");
+			yyprint("\tjump %s\n",called_func_name);
+			yyprint("label_%d:\n",block_num);
+			block_num++;
+		}
         }
         ;
 pre_func_call : /*empty*/
 	{
-		struct decl* unary = $<declptr>-1;
-		struct decl*
-		if(){
-			yyprint("\tshift_sp %d\n", findcurrentdecl(returnid)->size);
+		struct decl* procdecl = $<declptr>-1;
+		if(procdecl != NULL){
+			if(procdecl->returndecl){
+				yyprint("\tshift_sp %d\n", procdecl->returndecl->size);
+			}
 			yyprint("\tpush_const label_%d\n", block_num);
 			yyprint("\tpush_reg fp\n");
-
 		}
 		
 	}
-
+	;
 args:           expr{
                 REDUCE("args->expr");
                 $$ = makeconstdecl($1->type);
